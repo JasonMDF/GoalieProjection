@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goalie Fantasy Points Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        input {
+            margin: 10px 0;
+            padding: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
+        button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Goalie Fantasy Points Calculator</h1>
+    <label for="pga">Projected Goals Against:</label>
+    <input type="number" id="pga" placeholder="e.g., 2.5">
+
+    <label for="ml">Moneyline Odds:</label>
+    <input type="number" id="ml" placeholder="e.g., -166">
+
+    <label for="sa">Opposing Team Shot Attempts:</label>
+    <input type="number" id="sa" placeholder="e.g., 32.0">
+
+    <button onclick="calculateFantasyPoints()">Calculate</button>
+
+    <div class="output" id="output"></div>
+
+    <script>
+        function calculateWinProbability(ml) {
+            if (ml > 0) {
+                return 100 / (100 + ml); // Underdog
+            } else {
+                return Math.abs(ml) / (100 + Math.abs(ml)); // Favorite
+            }
+        }
+
+        function calculateFantasyPoints() {
+            const pga = parseFloat(document.getElementById("pga").value);
+            const ml = parseFloat(document.getElementById("ml").value);
+            const sa = parseFloat(document.getElementById("sa").value);
+
+            if (isNaN(pga) || isNaN(ml) || isNaN(sa)) {
+                document.getElementById("output").textContent = "Please enter valid numbers for all fields.";
+                return;
+            }
+
+            const wp = calculateWinProbability(ml);
+            const saves = sa - pga;
+            const sop = wp; // Assuming shutout probability scales with win probability
+            const fp = (wp * 6) - (pga * 3.5) + (saves * 0.7) + (sop * 4);
+
+            document.getElementById("output").textContent = `Projected Fantasy Points: ${fp.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>
+
