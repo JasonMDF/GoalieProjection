@@ -8,26 +8,12 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f8f9fa;
-            color: #333;
         }
-        input, button {
-            margin: 10px 0;
-            padding: 10px;
-            width: 100%;
-            max-width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        label, input, button {
+            display: block;
+            margin-bottom: 10px;
         }
-        button {
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .output {
+        #result {
             margin-top: 20px;
             font-weight: bold;
         }
@@ -35,41 +21,46 @@
 </head>
 <body>
     <h1>Goalie Fantasy Points Calculator</h1>
-    <label for="pga">Projected Goals Against:</label>
-    <input type="number" id="pga" placeholder="e.g., 2.5">
+    <label for="winProb">Win Probability (as decimal, e.g., 0.62):</label>
+    <input type="number" id="winProb" step="0.01" placeholder="Enter Win Probability">
 
-    <label for="ml">Moneyline Odds:</label>
-    <input type="number" id="ml" placeholder="e.g., -166">
+    <label for="shotsAgainst">Opposing Team Average Shots Per Game:</label>
+    <input type="number" id="shotsAgainst" step="1" placeholder="Enter Average Shots">
 
-    <label for="sa">Opposing Team Average Shots per Game:</label>
-    <input type="number" id="sa" placeholder="e.g., 32.0">
+    <label for="projGoalsAgainst">Projected Goals Against (PGA):</label>
+    <input type="number" id="projGoalsAgainst" step="0.1" placeholder="Enter Projected Goals Against">
 
-    <button onclick="calculateFantasyPoints()">Calculate</button>
+    <button onclick="calculateFantasyPoints()">Calculate Fantasy Points</button>
 
-    <div class="output" id="output"></div>
+    <div id="result"></div>
 
     <script>
-        function calculateWinProbability(ml) {
-            return ml > 0 ? 100 / (100 + ml) : Math.abs(ml) / (100 + Math.abs(ml));
-        }
-
         function calculateFantasyPoints() {
-            const pga = parseFloat(document.getElementById("pga").value);
-            const ml = parseFloat(document.getElementById("ml").value);
-            const sa = parseFloat(document.getElementById("sa").value);
+            const winProb = parseFloat(document.getElementById('winProb').value);
+            const shotsAgainst = parseFloat(document.getElementById('shotsAgainst').value);
+            const projGoalsAgainst = parseFloat(document.getElementById('projGoalsAgainst').value);
 
-            if (isNaN(pga) || isNaN(ml) || isNaN(sa)) {
-                document.getElementById("output").textContent = "Please enter valid numbers for all fields.";
+            if (isNaN(winProb) || isNaN(shotsAgainst) || isNaN(projGoalsAgainst)) {
+                document.getElementById('result').innerText = "Please fill in all fields with valid numbers.";
                 return;
             }
 
-            const wp = calculateWinProbability(ml);
-            const sop = wp; // Shutout probability scales with win probability
-            const saves = sa - pga;
+            // Fixed Shutout Scaling Factor (a = 1)
+            const shutoutScaling = 1;
 
-            const fp = (wp * 6) + (saves * 0.7) - (pga * 3.5) + (sop * 4);
+            // Calculate Shutout Probability
+            const shutoutProbability = Math.exp(-shutoutScaling * projGoalsAgainst);
 
-            document.getElementById("output").textContent = `Projected Fantasy Points: ${fp.toFixed(2)}`;
+            // Calculate Fantasy Points
+            const winPoints = winProb * 6;
+            const savePoints = (shotsAgainst - projGoalsAgainst) * 0.7;
+            const goalsAgainstPenalty = projGoalsAgainst * -3.5;
+            const shutoutPoints = shutoutProbability * 4;
+
+            const fantasyPoints = winPoints + savePoints + goalsAgainstPenalty + shutoutPoints;
+
+            document.getElementById('result').innerText = 
+                `Fantasy Points: ${fantasyPoints.toFixed(2)} (Shutout Probability: ${(shutoutProbability * 100).toFixed(2)}%)`;
         }
     </script>
 </body>
