@@ -8,6 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            max-width: 400px;
         }
         label, input, button {
             display: block;
@@ -15,14 +16,17 @@
         }
         #result {
             margin-top: 20px;
-            font-weight: bold;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
     <h1>Goalie Fantasy Points Calculator</h1>
-    <label for="winProb">Win Probability (as decimal, e.g., 0.62):</label>
-    <input type="number" id="winProb" step="0.01" placeholder="Enter Win Probability">
+
+    <label for="moneylineOdds">Moneyline Odds (e.g., -150 or +200):</label>
+    <input type="number" id="moneylineOdds" placeholder="Enter Moneyline Odds">
 
     <label for="shotsAgainst">Opposing Team Average Shots Per Game:</label>
     <input type="number" id="shotsAgainst" step="1" placeholder="Enter Average Shots">
@@ -36,16 +40,24 @@
 
     <script>
         function calculateFantasyPoints() {
-            const winProb = parseFloat(document.getElementById('winProb').value);
+            const moneylineOdds = parseFloat(document.getElementById('moneylineOdds').value);
             const shotsAgainst = parseFloat(document.getElementById('shotsAgainst').value);
             const projGoalsAgainst = parseFloat(document.getElementById('projGoalsAgainst').value);
 
-            if (isNaN(winProb) || isNaN(shotsAgainst) || isNaN(projGoalsAgainst)) {
+            if (isNaN(moneylineOdds) || isNaN(shotsAgainst) || isNaN(projGoalsAgainst)) {
                 document.getElementById('result').innerText = "Please fill in all fields with valid numbers.";
                 return;
             }
 
-            // Fixed Shutout Scaling Factor (a = 1)
+            // Convert Moneyline Odds to Decimal Probability
+            let winProb;
+            if (moneylineOdds < 0) {
+                winProb = -moneylineOdds / (-moneylineOdds + 100);
+            } else {
+                winProb = 100 / (moneylineOdds + 100);
+            }
+
+            // Fixed Shutout Scaling Factor
             const shutoutScaling = 1;
 
             // Calculate Shutout Probability
@@ -59,9 +71,13 @@
 
             const fantasyPoints = winPoints + savePoints + goalsAgainstPenalty + shutoutPoints;
 
-            document.getElementById('result').innerText = 
-                `Fantasy Points: ${fantasyPoints.toFixed(2)} (Shutout Probability: ${(shutoutProbability * 100).toFixed(2)}%)`;
+            document.getElementById('result').innerHTML = `
+                <p><strong>Fantasy Points:</strong> ${fantasyPoints.toFixed(2)}</p>
+                <p><strong>Shutout Probability:</strong> ${(shutoutProbability * 100).toFixed(2)}%</p>
+                <p><strong>Win Probability:</strong> ${(winProb * 100).toFixed(2)}%</p>
+            `;
         }
     </script>
 </body>
 </html>
+
