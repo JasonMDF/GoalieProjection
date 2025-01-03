@@ -59,12 +59,15 @@
 
         // Shutout Probability Scaling
         const shutoutScaling = 1;
-        const shutoutProbability = Math.exp(-shutoutScaling * projGoalsAgainst) * winProb;
+        const shutoutProbability = Math.max(0.01, Math.exp(-shutoutScaling * projGoalsAgainst) * winProb);
 
-        // Adjusted Save Points Weight
-        const savePoints = (shotsAgainst - projGoalsAgainst) * 0.7 * (1 - winProb);
+        // Adjusted Save Points
+        const savePoints = Math.max(
+            0, // Prevent negative save points
+            (shotsAgainst - projGoalsAgainst) * 0.7 * (1 - winProb)
+        );
 
-        // Fantasy Points Calculation
+        // Calculate Fantasy Points
         const winPoints = winProb * 6;
         const goalsAgainstPenalty = projGoalsAgainst * -3.5;
         const shutoutPoints = shutoutProbability * 4;
@@ -78,6 +81,7 @@
         `;
     }
 </script>
+
 
 
 </body>
