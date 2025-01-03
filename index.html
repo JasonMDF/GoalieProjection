@@ -57,15 +57,54 @@
             winProb = 100 / (moneylineOdds + 100);
         }
 
-        // Shutout Scaling Factor Adjusted for Win Probability
+        // Shutout Probability Scaling
         const shutoutScaling = 1;
         const shutoutProbability = Math.exp(-shutoutScaling * projGoalsAgainst) * winProb;
 
-        // Adjust Save Points Weighting Based on Win Probability
-        const savePointsWeight = 0.7 * (1 + (1 - winProb)); // Increases weight slightly for lower WP
-        const savePoints = (shotsAgainst - projGoalsAgainst) * savePointsWeight;
+        // Adjusted Save Points Weight
+        const savePoints = (shotsAgainst - projGoalsAgainst) * 0.7 * (1 - winProb);
 
-        // Calculate Fantasy Points
+        // Fantasy Points Calculation
+        const winPoints = winProb * 6;
+        const goalsAgainstPenalty = projGoalsAgainst * -3.5;
+        const shutoutPoints = shutoutProbability * 4;
+
+        const fantasyPoints = winPoints + savePoints + goalsAgainstPenalty + shutoutPoints;
+
+        document.getElementById('result').innerHTML = `
+            <p><strong>Fantasy Points:</strong> ${fantasyPoints.toFixed(2)}</p>
+            <p><strong>Shutout Probability:</strong> ${(shutoutProbability * 100).toFixed(2)}%</p>
+            <p><strong>Win Probability:</strong> ${(winProb * 100).toFixed(2)}%</p>
+        `;
+    }
+</script>
+<script>
+    function calculateFantasyPoints() {
+        const moneylineOdds = parseFloat(document.getElementById('moneylineOdds').value);
+        const shotsAgainst = parseFloat(document.getElementById('shotsAgainst').value);
+        const projGoalsAgainst = parseFloat(document.getElementById('projGoalsAgainst').value);
+
+        if (isNaN(moneylineOdds) || isNaN(shotsAgainst) || isNaN(projGoalsAgainst)) {
+            document.getElementById('result').innerText = "Please fill in all fields with valid numbers.";
+            return;
+        }
+
+        // Convert Moneyline Odds to Decimal Probability
+        let winProb;
+        if (moneylineOdds < 0) {
+            winProb = -moneylineOdds / (-moneylineOdds + 100);
+        } else {
+            winProb = 100 / (moneylineOdds + 100);
+        }
+
+        // Shutout Probability Scaling
+        const shutoutScaling = 1;
+        const shutoutProbability = Math.exp(-shutoutScaling * projGoalsAgainst) * winProb;
+
+        // Adjusted Save Points Weight
+        const savePoints = (shotsAgainst - projGoalsAgainst) * 0.7 * (1 - winProb);
+
+        // Fantasy Points Calculation
         const winPoints = winProb * 6;
         const goalsAgainstPenalty = projGoalsAgainst * -3.5;
         const shutoutPoints = shutoutProbability * 4;
