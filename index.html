@@ -49,7 +49,7 @@
             return;
         }
 
-        // Convert Moneyline Odds to Decimal Probability
+        // Convert Moneyline Odds to Win Probability
         let winProb;
         if (moneylineOdds < 0) {
             winProb = -moneylineOdds / (-moneylineOdds + 100);
@@ -57,19 +57,19 @@
             winProb = 100 / (moneylineOdds + 100);
         }
 
-        // Shutout Probability Scaling
+        // Recalibrated Shutout Probability
         const shutoutScaling = 1;
-        const shutoutProbability = Math.max(0.01, Math.exp(-shutoutScaling * projGoalsAgainst) * winProb);
+        const shutoutProbability = Math.exp(-shutoutScaling * projGoalsAgainst) * winProb;
 
-        // Adjusted Save Points
-        const savePoints = Math.max(
-            0, // Prevent negative save points
-            (shotsAgainst - projGoalsAgainst) * 0.7 * (1 - winProb)
-        );
+        // Save Points (adjusted SA Weight)
+        const saWeight = 0.8; // Adjusted weight for save points
+        const savePoints = Math.max(0, (shotsAgainst - projGoalsAgainst) * 0.7 * saWeight);
+
+        // Recalibrated Goals Against Penalty
+        const goalsAgainstPenalty = projGoalsAgainst * -2.5;
 
         // Calculate Fantasy Points
         const winPoints = winProb * 6;
-        const goalsAgainstPenalty = projGoalsAgainst * -3.5;
         const shutoutPoints = shutoutProbability * 4;
 
         const fantasyPoints = winPoints + savePoints + goalsAgainstPenalty + shutoutPoints;
@@ -81,6 +81,7 @@
         `;
     }
 </script>
+
 
 
 
